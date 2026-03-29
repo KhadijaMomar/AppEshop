@@ -30,7 +30,7 @@ class Order
     private ?bool $valid = false;
 
    
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
     /**

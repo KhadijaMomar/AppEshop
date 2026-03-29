@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+
+<div class="text-center mt-5">
+    <h1>Bienvenue sur ma boutique 🛒</h1>
+    <p class="lead">Découvrez nos produits au meilleur prix !</p>
+
+    <a href="{{ path('product_list') }}" class="btn btn-primary btn-lg mt-3">
+        Voir les produits
+    </a>
+</div>
+
+{% endblock %}

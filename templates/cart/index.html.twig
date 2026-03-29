@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panier{% endblock %}
+
+{% block body %}
+
+<h1 class="mb-4">🛒 Mon panier</h1>
+
+{% if cart is empty %}
+    <p>Votre panier est vide.</p>
+{% else %}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix</th>
+            <th>Quantité</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in cart %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.priceHT }} €</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.product.priceHT * item.quantity }} €</td>
+                <td>
+                    <a href="{{ path('cart_remove', {id: item.product.id}) }}" class="btn btn-danger btn-sm">
+                        Supprimer
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Total : {{ total }} €</h3>
+
+{% endif %}
+<a href="{{ path('order_create') }}" class="btn btn-success mt-3">
+    Valider la commande
+</a>
+<a href="{{ path('product_list') }}" class="btn btn-secondary mt-3">
+    ← Continuer les achats
+</a>
+
+{% endblock %}

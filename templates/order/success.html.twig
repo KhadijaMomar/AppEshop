@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande validée{% endblock %}
+
+{% block body %}
+
+<div class="text-center mt-5">
+    <h1 class="text-success">✅ Commande validée !</h1>
+
+    <p class="mt-3">Merci pour votre achat 🎉</p>
+
+    <a href="{{ path('product_list') }}" class="btn btn-primary mt-3">
+        Retour à la boutique
+    </a>
+</div>
+
+{% endblock %}

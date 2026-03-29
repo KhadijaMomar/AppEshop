@@ -6,9 +6,11 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -24,11 +26,21 @@ class User
     #[ORM\Column(length: 20)]
     private ?string $phone = null;
 
-    #[ORM\Column(length: 40, nullable: true)]
+    // Email obligatoire et unique
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 40, nullable: true)]
+    // Mot de passe hashé
+    #[ORM\Column]
     private ?string $password = null;
+
+    // Rôles JSON
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    // 👉 Date de naissance (nullable)
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTimeInterface $birthDate = null;
 
     /**
      * @var Collection<int, CustomerAddress>
@@ -54,7 +66,6 @@ class User
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -66,7 +77,6 @@ class User
     public function setFirstName(?string $firstName): static
     {
         $this->firstName = $firstName;
-
         return $this;
     }
 
@@ -78,7 +88,6 @@ class User
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
-
         return $this;
     }
 
@@ -87,23 +96,58 @@ class User
         return $this->email;
     }
 
-    public function setEmail(?string $email): static
+    public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
+    // 🔐 Identifier pour Symfony (login)
+    public function getUserIdentifier(): string
+    {
+        return (string)$this->email;
+    }
+
+    // 🔐 Rôles utilisateur
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    // 🔐 Mot de passe hashé
     public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    public function setPassword(?string $password): static
+    public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
+    }
+    public function getBirthDate(): ?\DateTimeInterface
+    {
+        return $this->birthDate;
+    }
+
+    public function setBirthDate(?\DateTimeInterface $birthDate): static
+    {
+        $this->birthDate = $birthDate;
+        return $this;
+    }
+
+    // 🔐 Nettoyage des infos sensibles (inutile ici)
+    public function eraseCredentials(): void
+    {
     }
 
     /**
@@ -120,19 +164,16 @@ class User
             $this->customerAddresses->add($customerAddress);
             $customerAddress->setUser($this);
         }
-
         return $this;
     }
 
     public function removeCustomerAddress(CustomerAddress $customerAddress): static
     {
         if ($this->customerAddresses->removeElement($customerAddress)) {
-            // set the owning side to null (unless already changed)
-            if ($customerAddress->getName() === $this) {
+            if ($customerAddress->getUser() === $this) {
                 $customerAddress->setUser(null);
             }
         }
-
         return $this;
     }
 }
