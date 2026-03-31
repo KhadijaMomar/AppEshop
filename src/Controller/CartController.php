@@ -63,4 +63,21 @@ class CartController extends AbstractController
 
         return $this->redirectToRoute('cart_index');
     }
+    #[Route('/cart/decrease/{id}', name: 'cart_decrease')]
+    public function decrease(int $id, SessionInterface $session)
+    {
+        $cart = $session->get('cart', []);
+
+        if (!empty($cart[$id])) {
+            $cart[$id]--;
+
+            if ($cart[$id] <= 0) {
+                unset($cart[$id]);
+            }
+        }
+
+        $session->set('cart', $cart);
+
+        return $this->redirectToRoute('cart_index');
+    }
 }
