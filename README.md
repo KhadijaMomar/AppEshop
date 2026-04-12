@@ -58,6 +58,29 @@ Le panier est géré **en session**.
 
 ---
 
+# 🛠️ Retour d'expérience : Le piège des Sessions & HTTPS
+
+### ⚠️ La grande galère du déploiement
+Pendant le déploiement sur Alwaysdata, j'ai rencontré un problème particulièrement frustrant : l'authentification semblait fonctionner (aucune erreur dans les logs Symfony, le `LoginFormAuthenticator` renvoyait bien un succès), mais l'utilisateur n'était **jamais connecté** côté navigateur. 
+
+Le site se comportait comme si j'étais toujours un invité, ignorant totalement la session qui venait d'être créée.
+
+### 🔍 Le diagnostic
+Après analyse des logs (`dev.log`), j'ai vu que le token de sécurité était bien stocké en session :
+`security.DEBUG: Stored the security token in the session.`
+
+Cependant, comme j'accédais au site en **HTTP**, le navigateur bloquait le cookie de session. Symfony (dans ses versions récentes) configure les cookies pour être `Secure` par défaut. Si le site n'est pas en HTTPS, le navigateur reçoit le cookie mais refuse de le renvoyer au serveur. Pour Symfony, chaque clic sur une page était donc considéré comme une nouvelle visite anonyme.
+
+### ✅ La Solution
+Pour corriger cela, il ne fallait pas modifier le code, mais l'infrastructure :
+
+1.  **Forcer le HTTPS** dans l'interface d'administration Alwaysdata (*Web > Sites > Modifier > Cocher "Forcer le HTTPS"*).
+2.  Accéder au projet via l'URL sécurisée : `https://dija.alwaysdata.net/AppEshop/`.
+
+**Moralité :** En production avec Symfony, si ton authentification "réussit" mais que tu restes déconnecté, vérifie ton protocole. Pas de HTTPS = Pas de Session ! 🛡️
+
+---
+
 ## Notes techniques
 
 - **Panier en session :** Tous les produits ajoutés au panier sont stockés dans la session Symfony.  
